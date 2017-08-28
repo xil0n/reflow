@@ -2,6 +2,7 @@ import sys
 import json
 import spotipy
 import spotipy.util as util
+from pymongo import MongoClient
 
 scope = 'user-library-read'
 
@@ -15,6 +16,8 @@ token = util.prompt_for_user_token(username, scope)
 
 if token:
     spotify = spotipy.Spotify(auth=token)
+    client = MongoClient()
+    db = client['urban_music']
     data = []
 
     # List of urban artists.
@@ -54,11 +57,10 @@ if token:
                 tracks['valence'] = analysis['valence']
                 json_tracks.append(tracks)
                 tracks = {}
-            print json_tracks
-            exit()
             info["tracks"] = json_tracks
-            data.append({artist:info})
-    print data
+            artists = db.artists
+            results = artists.insert_one({artist:info})
+            print('artist: {0}'.format(results.inserted_id))
 else:
     print "Can't get token for", username
 
