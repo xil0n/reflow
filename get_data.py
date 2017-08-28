@@ -29,11 +29,34 @@ if token:
         results = spotify.search(q='artist:' + artist, type='artist')
         items = results['artists']['items']
         info = {}
+        tracks = {}
         if len(items) > 0:
             info['id'] = items[0]['uri'].split(':')[-1]
             info['popularity'] = items[0]['popularity']
             info['genres'] = items[0]['genres']
             info['followers'] = items[0]['followers']['total']
+            top_tracks = spotify.artist_top_tracks(info['id'])
+            json_tracks = []
+            for track in top_tracks['tracks']:
+                tracks['name'] = track['name']
+                tracks['popularity'] = track['popularity']
+                tracks['id'] = track['id']
+                analysis = spotify.audio_features(str(track['id']))[0]
+                tracks['acousticness'] = analysis['acousticness']
+                tracks['danceability'] = analysis['danceability']
+                tracks['duration_ms'] = analysis['duration_ms']
+                tracks['energy'] = analysis['energy']
+                tracks['instrumentalness'] = analysis['instrumentalness']
+                tracks['key'] = analysis['key']
+                tracks['liveness'] = analysis['liveness']
+                tracks['loudness'] = analysis['loudness']
+                tracks['tempo'] = analysis['tempo']
+                tracks['valence'] = analysis['valence']
+                json_tracks.append(tracks)
+                tracks = {}
+            print json_tracks
+            exit()
+            info["tracks"] = json_tracks
             data.append({artist:info})
     print data
 else:
